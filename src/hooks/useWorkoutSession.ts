@@ -22,20 +22,6 @@ export interface Session {
   durationMin?: number
 }
 
-const STORAGE_KEY = 'workout_sessions'
-
-function loadSessions(): Session[] {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
-  } catch {
-    return []
-  }
-}
-
-function saveSessions(sessions: Session[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions))
-}
-
 function buildInitialLogs(exercises: ExerciseDefinition[], prev: Session | undefined): ExerciseLog[] {
   return exercises.map(ex => {
     const prevEx = prev?.exercises.find(e => e.exerciseId === ex.id)
@@ -53,8 +39,12 @@ function buildInitialLogs(exercises: ExerciseDefinition[], prev: Session | undef
   })
 }
 
-export function useWorkoutSession() {
-  const [sessions, setSessions] = useState<Session[]>(loadSessions)
+interface UseWorkoutSessionOptions {
+  sessions: Session[]
+  persist: (sessions: Session[]) => Promise<void>
+}
+
+export function useWorkoutSession({ sessions, persist }: UseWorkoutSessionOptions) {
   const [active, setActive] = useState<Session | null>(null)
   const [startTime, setStartTime] = useState<number | null>(null)
 
@@ -87,18 +77,17 @@ export function useWorkoutSession() {
     })
   }, [])
 
-  const finishSession = useCallback(() => {
+  const finishSession = useCallback(async () => {
     if (!active) return
     const now = Date.now()
     const durationMin = startTime ? Math.round((now - startTime) / 60000) : undefined
     const finished = { ...active, finishedAt: new Date(now).toISOString(), durationMin }
     const updated = [...sessions, finished]
-    saveSessions(updated)
-    setSessions(updated)
+    await persist(updated)
     setActive(null)
     setStartTime(null)
     return finished
-  }, [active, sessions, startTime])
+  }, [active, sessions, startTime, persist])
 
   const cancelSession = useCallback(() => {
     setActive(null)
@@ -109,11 +98,10 @@ export function useWorkoutSession() {
     return sessions.filter(s => s.workoutType === workoutType).at(-1)
   }, [sessions])
 
-  const deleteSession = useCallback((id: string) => {
+  const deleteSession = useCallback(async (id: string) => {
     const updated = sessions.filter(s => s.id !== id)
-    saveSessions(updated)
-    setSessions(updated)
-  }, [sessions])
+    await persist(updated)
+  }, [sessions, persist])
 
   return {
     sessions,
