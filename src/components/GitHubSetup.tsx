@@ -7,21 +7,28 @@ interface Props {
 
 export default function GitHubSetup({ onSave }: Props) {
   const [token, setToken] = useState('')
-  const [owner, setOwner] = useState('')
-  const [repo, setRepo] = useState('')
+  const [repoFull, setRepoFull] = useState('')
   const [testing, setTesting] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setErr(null)
+
+    const parts = repoFull.trim().split('/')
+    if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      setErr('Repo must be in owner/repo format, e.g. CalypsoLangevin/workout-data')
+      return
+    }
+    const [owner, repo] = parts
+
     setTesting(true)
     try {
       const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
       })
       if (res.status === 401) throw new Error('Invalid token — check your PAT.')
-      if (res.status === 404) throw new Error('Repo not found — check owner and repo name.')
+      if (res.status === 404) throw new Error('Repo not found — check the owner/repo name.')
       if (!res.ok) throw new Error(`GitHub error: ${res.status}`)
       onSave({ token, owner, repo })
     } catch (e: unknown) {
@@ -57,24 +64,12 @@ export default function GitHubSetup({ onSave }: Props) {
         </label>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">GitHub Username</span>
+          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">Repository</span>
           <input
             type="text"
-            value={owner}
-            onChange={e => setOwner(e.target.value)}
-            placeholder="your-username"
-            required
-            className="bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/20 text-sm outline-none focus:border-purple-400/50 transition-colors"
-          />
-        </label>
-
-        <label className="flex flex-col gap-1.5">
-          <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">Repository Name</span>
-          <input
-            type="text"
-            value={repo}
-            onChange={e => setRepo(e.target.value)}
-            placeholder="workout-data"
+            value={repoFull}
+            onChange={e => setRepoFull(e.target.value)}
+            placeholder="CalypsoLangevin/workout-data"
             required
             className="bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder:text-white/20 text-sm outline-none focus:border-purple-400/50 transition-colors"
           />
