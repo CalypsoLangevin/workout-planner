@@ -18,10 +18,12 @@ const ACCENT_COLORS = [
 
 // Group exercises by muscle area for the picker
 const muscleGroups: { label: string; ids: string[] }[] = [
-  { label: 'Lower Body', ids: ['a1-goblet-squat', 'a2-rdl', 'a6-hip-thrust', 'b1-leg-press', 'b2-sl-rdl', 'b7-clamshell'] },
-  { label: 'Upper Body Pull', ids: ['a3-lat-pulldown', 'a5-cable-row', 'b3-pullup'] },
-  { label: 'Upper Body Push', ids: ['a4-shoulder-press', 'b4-incline-press', 'b5-lateral-raise'] },
-  { label: 'Core', ids: ['a7-plank', 'b6-dead-bug'] },
+  { label: 'Warmup & Mobility', ids: ['wu-glute-bridge', 'wu-cat-cow', 'wu-hip-circle', 'wu-plank', 'wu-inchworm', 'wu-leg-swing', 'wu-band-pull-apart', 'wu-world-greatest-stretch', 'wu-thoracic-rotation'] },
+  { label: 'Lower Body', ids: ['goblet-squat', 'barbell-squat', 'front-squat', 'rdl', 'conventional-deadlift', 'sumo-deadlift', 'hip-thrust', 'leg-press', 'hack-squat', 'walking-lunge', 'reverse-lunge', 'bulgarian-split-squat', 'step-up', 'leg-curl', 'leg-extension', 'sl-rdl', 'clamshell', 'calf-raise', 'seated-calf-raise', 'nordic-curl', 'glute-kickback', 'good-morning', 'box-jump', 'wall-sit'] },
+  { label: 'Upper Body Push', ids: ['bench-press', 'flat-db-press', 'incline-db-press', 'push-up', 'dip', 'shoulder-press', 'arnold-press', 'lateral-raise', 'front-raise', 'cable-chest-fly', 'tricep-pushdown', 'overhead-tricep-extension', 'skull-crusher', 'close-grip-bench'] },
+  { label: 'Upper Body Pull', ids: ['lat-pulldown', 'cable-row', 'pullup', 'chin-up', 'barbell-row', 'db-row', 'chest-supported-row', 'face-pull', 'rear-delt-fly', 'inverted-row', 'shrug', 'bicep-curl', 'hammer-curl', 'preacher-curl', 'cable-curl', 'upright-row'] },
+  { label: 'Core', ids: ['forearm-plank', 'side-plank', 'dead-bug', 'hollow-body-hold', 'leg-raise', 'knee-raise', 'crunch', 'sit-up', 'russian-twist', 'bicycle-crunch', 'pallof-press', 'ab-wheel', 'bird-dog', 'mountain-climber'] },
+  { label: 'Cardio & Conditioning', ids: ['burpee', 'jumping-jack', 'jump-rope', 'battle-rope', 'sled-push', 'rowing-machine'] },
 ]
 
 // ─── Exercise picker modal ─────────────────────────────────────────────────────
