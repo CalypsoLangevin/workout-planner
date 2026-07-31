@@ -1,20 +1,19 @@
 import { useState } from 'react'
-import { workouts } from '../data/workouts'
+import type { WorkoutDefinition } from '../data/workouts'
 import { useWorkoutSession } from '../hooks/useWorkoutSession'
 import ExerciseCard from './ExerciseCard'
 
 interface Props {
-  workoutType: 'A' | 'B'
+  workout: WorkoutDefinition
   session: ReturnType<typeof useWorkoutSession>
   onFinish: () => void
   onCancel: () => void
 }
 
-export default function WorkoutView({ workoutType, session, onFinish, onCancel }: Props) {
+export default function WorkoutView({ workout, session, onFinish, onCancel }: Props) {
   const [confirmCancel, setConfirmCancel] = useState(false)
-  const workout = workouts[workoutType]
   const { active, updateSet, finishSession, cancelSession, getPreviousSession } = session
-  const prev = getPreviousSession(workoutType)
+  const prev = getPreviousSession(workout.id)
 
   if (!active) return null
 
@@ -44,7 +43,7 @@ export default function WorkoutView({ workoutType, session, onFinish, onCancel }
         <div className="flex items-center justify-between mb-3">
           <div>
             <h2 className="text-white font-bold text-lg tracking-tight leading-tight">{workout.title}</h2>
-            <p className="text-white/40 text-xs">{workout.subtitle}</p>
+            {workout.subtitle && <p className="text-white/40 text-xs">{workout.subtitle}</p>}
           </div>
           <button
             onClick={() => setConfirmCancel(true)}
@@ -67,26 +66,28 @@ export default function WorkoutView({ workoutType, session, onFinish, onCancel }
 
       <div className="px-4 pt-5 space-y-6">
         {/* Warm-up */}
-        <section>
-          <p className="text-[10px] font-semibold text-blue-400/60 uppercase tracking-widest mb-3">Warm-up</p>
-          <div className="space-y-2.5">
-            {workout.warmup.map(ex => {
-              const log = active.exercises.find(e => e.exerciseId === ex.id)
-              const prevLog = prev?.exercises.find(e => e.exerciseId === ex.id)
-              if (!log) return null
-              return (
-                <ExerciseCard
-                  key={ex.id}
-                  exercise={ex}
-                  log={log}
-                  prevLog={prevLog}
-                  onSetChange={(si, patch) => updateSet(ex.id, si, patch)}
-                  isWarmup
-                />
-              )
-            })}
-          </div>
-        </section>
+        {workout.warmup.length > 0 && (
+          <section>
+            <p className="text-[10px] font-semibold text-blue-400/60 uppercase tracking-widest mb-3">Warm-up</p>
+            <div className="space-y-2.5">
+              {workout.warmup.map(ex => {
+                const log = active.exercises.find(e => e.exerciseId === ex.id)
+                const prevLog = prev?.exercises.find(e => e.exerciseId === ex.id)
+                if (!log) return null
+                return (
+                  <ExerciseCard
+                    key={ex.id}
+                    exercise={ex}
+                    log={log}
+                    prevLog={prevLog}
+                    onSetChange={(si, patch) => updateSet(ex.id, si, patch)}
+                    isWarmup
+                  />
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Main work */}
         <section>

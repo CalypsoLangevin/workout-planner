@@ -212,16 +212,12 @@ function SessionCard({ session, onDelete }: { session: Session; onDelete: () => 
         className="w-full text-left px-4 py-4 flex items-center gap-3 active:bg-white/[0.03]"
         onClick={() => setOpen(o => !o)}
       >
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 border ${
-          session.workoutType === 'A'
-            ? 'bg-violet-500/40 border-violet-400/25 text-white'
-            : 'bg-blue-500/40 border-blue-400/25 text-white'
-        }`}>
-          {session.workoutType}
+        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0 border bg-violet-500/40 border-violet-400/25 text-white overflow-hidden">
+          {(session.workoutName || session.workoutType).slice(0, 2).toUpperCase()}
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-sm">Workout {session.workoutType}</p>
+          <p className="text-white font-semibold text-sm">{session.workoutName || `Workout ${session.workoutType}`}</p>
           <p className="text-white/40 text-xs">{fmtDate(session.date)}</p>
           <div className="flex items-center gap-3 mt-0.5 flex-wrap">
             <span className="text-white/25 text-xs">{fmtTime(session.date)}{session.finishedAt ? ` → ${fmtTime(session.finishedAt)}` : ''}</span>

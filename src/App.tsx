@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useWorkoutSession } from './hooks/useWorkoutSession'
 import { useGitHubStorage, loadConfig, saveConfig, type GitHubConfig } from './hooks/useGitHubStorage'
-import { workouts } from './data/workouts'
+import { defaultTemplates, templateToWorkoutDefinition } from './data/workouts'
+import type { WorkoutDefinition } from './data/workouts'
 import Dashboard from './components/Dashboard'
 import WorkoutView from './components/WorkoutView'
 import HistoryView from './components/HistoryView'
 import GitHubSetup from './components/GitHubSetup'
+import TemplatesView from './components/TemplatesView'
 
-type View = 'dashboard' | 'workout' | 'history' | 'done'
+type View = 'dashboard' | 'workout' | 'history' | 'templates' | 'done'
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -22,10 +24,14 @@ function Shell({ children }: { children: React.ReactNode }) {
 export default function App() {
   const [config, setConfig] = useState<GitHubConfig | null>(loadConfig)
   const [view, setView] = useState<View>('dashboard')
-  const [activeType, setActiveType] = useState<'A' | 'B'>('A')
+  const [activeWorkout, setActiveWorkout] = useState<WorkoutDefinition | null>(null)
 
-  const { sessions, persist, loading, syncing, error } = useGitHubStorage(config)
-  const session = useWorkoutSession({ sessions, persist })
+  const { sessions, templates: storedTemplates, persistSessions, persistTemplates, loading, syncing, error } = useGitHubStorage(config)
+
+  // Use stored templates if any, otherwise show default Workout A
+  const templates = storedTemplates.length > 0 ? storedTemplates : defaultTemplates
+
+  const session = useWorkoutSession({ sessions, persist: persistSessions })
 
   function handleConfigSave(cfg: GitHubConfig) {
     saveConfig(cfg)
@@ -50,9 +56,12 @@ export default function App() {
     )
   }
 
-  function handleStart(type: 'A' | 'B') {
-    session.startSession(workouts[type])
-    setActiveType(type)
+  function handleStart(templateId: string) {
+    const template = templates.find(t => t.id === templateId)
+    if (!template) return
+    const def = templateToWorkoutDefinition(template)
+    session.startSession(def)
+    setActiveWorkout(def)
     setView('workout')
   }
 
@@ -101,14 +110,27 @@ export default function App() {
     )
   }
 
-  if (view === 'workout') {
+  if (view === 'workout' && activeWorkout) {
     return (
       <Shell>
         <WorkoutView
-          workoutType={activeType}
+          workout={activeWorkout}
           session={session}
           onFinish={() => setView('done')}
           onCancel={() => setView('dashboard')}
+        />
+      </Shell>
+    )
+  }
+
+  if (view === 'templates') {
+    return (
+      <Shell>
+        <TemplatesView
+          templates={templates}
+          onSave={persistTemplates}
+          onBack={() => setView('dashboard')}
+          syncing={syncing}
         />
       </Shell>
     )
@@ -128,8 +150,10 @@ export default function App() {
       )}
       <Dashboard
         sessions={session.sessions}
+        templates={templates}
         onStart={handleStart}
         onHistory={() => setView('history')}
+        onManageTemplates={() => setView('templates')}
       />
     </Shell>
   )

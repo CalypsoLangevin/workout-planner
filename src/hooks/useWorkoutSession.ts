@@ -15,9 +15,10 @@ export interface ExerciseLog {
 
 export interface Session {
   id: string
-  date: string        // ISO — session start
-  finishedAt?: string // ISO — session end
-  workoutType: 'A' | 'B'
+  date: string
+  finishedAt?: string
+  workoutType: string
+  workoutName: string
   exercises: ExerciseLog[]
   durationMin?: number
 }
@@ -56,6 +57,7 @@ export function useWorkoutSession({ sessions, persist }: UseWorkoutSessionOption
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
       workoutType: workout.id,
+      workoutName: workout.title,
       exercises: logs,
     }
     setActive(session)
@@ -94,7 +96,7 @@ export function useWorkoutSession({ sessions, persist }: UseWorkoutSessionOption
     setStartTime(null)
   }, [])
 
-  const getPreviousSession = useCallback((workoutType: 'A' | 'B') => {
+  const getPreviousSession = useCallback((workoutType: string) => {
     return sessions.filter(s => s.workoutType === workoutType).at(-1)
   }, [sessions])
 
